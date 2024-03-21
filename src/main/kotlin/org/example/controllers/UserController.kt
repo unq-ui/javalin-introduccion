@@ -1,11 +1,12 @@
-package org.example
+package org.example.controllers
 
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
-import io.javalin.validation.ValidationError
-
-class User (val id: String, val username: String, var password: String, val followers: MutableList<User>)
+import org.example.utils.CreateUserBody
+import org.example.utils.EditUserBody
+import org.example.utils.UserDTO
+import org.example.model.User
 
 class UserController {
 
@@ -27,7 +28,7 @@ class UserController {
 
     fun createUser(ctx: Context) {
         val body =  ctx.bodyValidator(CreateUserBody::class.java)
-            .check({ it.username.isNotEmpty() }, ValidationError("username was empty", args = mapOf()))
+            .check({ it.username.isNotEmpty() }, "username was empty")
             .check({ it.password.isNotEmpty() }, "password was empty")
             .getOrThrow {
                 BadRequestResponse("mandaste cualquier cosa")

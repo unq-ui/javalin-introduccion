@@ -1,4 +1,6 @@
-package org.example
+package org.example.utils
+
+import org.example.model.User
 
 class UserDTO (user: User) {
     val id = user.id
