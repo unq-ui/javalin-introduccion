@@ -7,25 +7,26 @@ import org.example.utils.CreateUserBody
 import org.example.utils.EditUserBody
 import org.example.utils.UserDTO
 import org.example.model.User
+import org.example.utils.LoginBody
+import kotlin.reflect.KFunction2
 
-class UserController {
-
-    var users = mutableListOf(
-        User("u_1", "jota", "jota", mutableListOf()),
-        User("u_2", "fede", "fede", mutableListOf()),
-        User("u_3", "pepe", "pepe", mutableListOf()),
-        User("u_4", "flor", "flor", mutableListOf())
-    )
-
-    init {
-        users[0].followers.add(users[1])
-        users[1].followers.add(users[0])
-    }
-
+class UserController(var users: MutableList<User>, val addToken: KFunction2<Context, User, Unit>) {
     fun getAllUsers(ctx: Context) {
         ctx.json(users.map { UserDTO(it) })
     }
 
+    fun login(ctx: Context) {
+        val body =  ctx.bodyValidator(LoginBody::class.java)
+            .check({ it.username.isNotEmpty() }, "username was empty")
+            .check({ it.password.isNotEmpty() }, "password was empty")
+            .getOrThrow {
+                BadRequestResponse("mandaste cualquier cosa")
+            }
+        val user = users.find { it.username == body.username && it.password == body.password } ?: throw NotFoundResponse("No se encontro o algun dato mal")
+        addToken(ctx, user)
+        ctx.json(UserDTO(user))
+
+    }
     fun createUser(ctx: Context) {
         val body =  ctx.bodyValidator(CreateUserBody::class.java)
             .check({ it.username.isNotEmpty() }, "username was empty")
